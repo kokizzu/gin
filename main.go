@@ -141,6 +141,7 @@ func EnvAction(c *cli.Context) {
 }
 
 func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
+	start := time.Now()
 	err := builder.Build()
 	if err != nil {
 		buildError = err
@@ -149,7 +150,8 @@ func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
 	} else {
 		// print success only if there were errors before
 		if buildError != nil {
-			logger.Println("Build Successful")
+			elapsed := float64(time.Since(start).Nanoseconds())
+			logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
 		}
 		buildError = nil
 		if immediate {

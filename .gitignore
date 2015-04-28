@@ -22,3 +22,5 @@ _testmain.go
 *.exe
 
 lib/test_fixtures/build_success/build_success
+
+.idea
