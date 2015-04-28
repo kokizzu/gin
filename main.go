@@ -94,7 +94,12 @@ func MainAction(c *cli.Context) {
 	}
 
 	builder := gin.NewBuilder(c.GlobalString("path"), c.GlobalString("bin"), c.GlobalBool("godep"))
-	runner := gin.NewRunner(filepath.Join(wd, builder.Binary()), c.Args()...)
+	runpath := builder.Binary()
+	if runpath[0] != '/' {
+		runpath = filepath.Join(wd, runpath)
+	}
+	runner := gin.NewRunner(runpath, c.Args()...)
+
 	runner.SetWriter(os.Stdout)
 	proxy := gin.NewProxy(builder, runner)
 
