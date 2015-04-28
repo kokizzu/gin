@@ -48,7 +48,7 @@ func (b *builder) Build() error {
 	if b.useGodep {
 		command = exec.Command("godep", "go", "build", "-o", b.binary)
 	} else {
-		command = exec.Command("go", "build", "-o", b.binary)
+		command = exec.Command("colorgo", "build", "-x", "-v", "-o", b.binary)
 	}
 	command.Dir = b.dir
 

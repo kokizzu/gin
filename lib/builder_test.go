@@ -1,7 +1,7 @@
 package gin_test
 
 import (
-	"github.com/codegangsta/gin/lib"
+	"github.com/kokizzu/gin/lib"
 	"os"
 	"path/filepath"
 	"runtime"
