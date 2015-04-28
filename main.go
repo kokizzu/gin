@@ -148,17 +148,13 @@ func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
 		logger.Println("ERROR! Build failed.")
 		fmt.Println(builder.Errors())
 	} else {
-		// print success only if there were errors before
-		if buildError != nil {
-			elapsed := float64(time.Since(start).Nanoseconds())
-			logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
-		}
+		elapsed := float64(time.Since(start).Nanoseconds())
+		logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
 		buildError = nil
 		if immediate {
 			runner.Run()
 		}
 	}
-
 	time.Sleep(100 * time.Millisecond)
 }
 
