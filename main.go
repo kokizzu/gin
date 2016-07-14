@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/codegangsta/cli"
+	"gopkg.in/urfave/cli.v1"
 	"github.com/codegangsta/envy/lib"
 	"github.com/kokizzu/gin/lib"
 
@@ -94,12 +94,7 @@ func MainAction(c *cli.Context) {
 	}
 
 	builder := gin.NewBuilder(c.GlobalString("path"), c.GlobalString("bin"), c.GlobalBool("godep"))
-	runpath := builder.Binary()
-	if runpath[0] != '/' {
-		runpath = filepath.Join(wd, runpath)
-	}
-	runner := gin.NewRunner(runpath, c.Args()...)
-
+	runner := gin.NewRunner(filepath.Join(wd, builder.Binary()), c.Args()...)
 	runner.SetWriter(os.Stdout)
 	proxy := gin.NewProxy(builder, runner)
 
@@ -122,6 +117,7 @@ func MainAction(c *cli.Context) {
 
 	// scan for changes
 	scanChanges(c.GlobalString("path"), func(path string) {
+                fmt.Println(`[modified]`,path)
 		runner.Kill()
 		build(builder, runner, logger)
 	})
@@ -148,13 +144,17 @@ func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
 		logger.Println("ERROR! Build failed.")
 		fmt.Println(builder.Errors())
 	} else {
-		elapsed := float64(time.Since(start).Nanoseconds())
-		logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
+		// print success only if there were errors before
+		if buildError != nil {
+			elapsed := float64(time.Since(start).Nanoseconds())
+			logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
+		}
 		buildError = nil
 		if immediate {
 			runner.Run()
 		}
 	}
+
 	time.Sleep(100 * time.Millisecond)
 }
 
