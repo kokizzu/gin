@@ -94,7 +94,11 @@ func MainAction(c *cli.Context) {
 	}
 
 	builder := gin.NewBuilder(c.GlobalString("path"), c.GlobalString("bin"), c.GlobalBool("godep"))
-	runner := gin.NewRunner(filepath.Join(wd, builder.Binary()), c.Args()...)
+	runpath := builder.Binary()
+	if runpath[0] != '/' { // prevent merging with working directory when absolute path		
+ 		runpath = filepath.Join(wd, runpath)		
+ 	}		
+ 	runner := gin.NewRunner(runpath, c.Args()...)	
 	runner.SetWriter(os.Stdout)
 	proxy := gin.NewProxy(builder, runner)
 
@@ -144,11 +148,8 @@ func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
 		logger.Println("ERROR! Build failed.")
 		fmt.Println(builder.Errors())
 	} else {
-		// print success only if there were errors before
-		if buildError != nil {
-			elapsed := float64(time.Since(start).Nanoseconds())
-			logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
-		}
+		elapsed := float64(time.Since(start).Nanoseconds())
+		logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
 		buildError = nil
 		if immediate {
 			runner.Run()

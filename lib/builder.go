@@ -48,11 +48,11 @@ func (b *builder) Build() error {
 	if b.useGodep {
 		command = exec.Command("godep", "go", "build", "-o", b.binary)
 	} else {
-		command = exec.Command("go", "build", "-i", "-v", "-o", b.binary)
+		command = exec.Command("go", "build", "-i", "-o", b.binary)
+
 	}
 	command.Dir = b.dir
 	output, err := command.CombinedOutput()
-	fmt.Println(string(output))
 
 	if command.ProcessState.Success() {
 		b.errors = ""
