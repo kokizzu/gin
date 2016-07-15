@@ -59,7 +59,8 @@ func (b *builder) Build() error {
 	if !command.ProcessState.Success() {
 		b.errors = out
 		return fmt.Errorf(`%s`, out)
+	} else {
+		b.errors = ``
+		return nil
 	}
-
-	return nil
 }
