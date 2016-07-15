@@ -1,10 +1,10 @@
 package gin
 
 import (
-	"fmt"
 	"os/exec"
 	"runtime"
 	"strings"
+	"os"
 )
 
 type Builder interface {
@@ -27,7 +27,8 @@ func NewBuilder(dir string, bin string, useGodep bool) Builder {
 
 	// does not work on Windows without the ".exe" extension
 	if runtime.GOOS == "windows" {
-		if !strings.HasSuffix(bin, ".exe") { // check if it already has the .exe extension
+		if !strings.HasSuffix(bin, ".exe") {
+			// check if it already has the .exe extension
 			bin += ".exe"
 		}
 	}
@@ -48,20 +49,17 @@ func (b *builder) Build() error {
 	if b.useGodep {
 		command = exec.Command("godep", "go", "build", "-o", b.binary)
 	} else {
-		command = exec.Command("go", "build", "-i", "-o", b.binary)
-
+		command = exec.Command("go", "build", "-i", `-x`,`-toolexec`, `/usr/bin/time -f "\t%es\t%MKB"`, "-o", b.binary)
 	}
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
 	command.Dir = b.dir
-	output, err := command.CombinedOutput()
+	err := command.Run()
 
-	if command.ProcessState.Success() {
+	if err == nil {
 		b.errors = ""
 	} else {
-		b.errors = string(output)
-	}
-
-	if len(b.errors) > 0 {
-		return fmt.Errorf(b.errors)
+		b.errors = err.Error()
 	}
 
 	return err
