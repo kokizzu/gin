@@ -122,6 +122,7 @@ func MainAction(c *cli.Context) {
 	// scan for changes
 	scanChanges(c.GlobalString("path"), func(path string) {
 		fmt.Println(`[modified]`, path)
+		builder.SetErrors(`[modified] ` + path + "\n  recompiling, please wait.. " + time.Now().Format(`2006-01-02 15:04:05`))
 		runner.Kill()
 		build(builder, runner, logger)
 	})

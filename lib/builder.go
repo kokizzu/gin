@@ -11,6 +11,7 @@ type Builder interface {
 	Build() error
 	Binary() string
 	Errors() string
+	SetErrors(str string)
 }
 
 type builder struct {
@@ -63,4 +64,8 @@ func (b *builder) Build() error {
 		b.errors = ``
 		return nil
 	}
+}
+
+func (b *builder) SetErrors(str string) {
+	b.errors = str
 }
