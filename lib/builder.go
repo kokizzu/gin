@@ -4,7 +4,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"os"
+	"fmt"
 )
 
 type Builder interface {
@@ -49,18 +49,17 @@ func (b *builder) Build() error {
 	if b.useGodep {
 		command = exec.Command("godep", "go", "build", "-o", b.binary)
 	} else {
-		command = exec.Command("go", "build", "-i", `-x`,`-toolexec`, `/usr/bin/time -f "\t%es\t%MKB"`, "-o", b.binary)
+		command = exec.Command("go", "build", "-i", `-x`, `-toolexec`, "/usr/bin/time -f '\t%e s\t%M KB'", "-o", b.binary)
 	}
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
 	command.Dir = b.dir
-	err := command.Run()
+	res, _ := command.CombinedOutput()
+	out := string(res)
+	fmt.Print(out)
 
-	if err == nil {
-		b.errors = ""
-	} else {
-		b.errors = err.Error()
+	if !command.ProcessState.Success() {
+		b.errors = out
+		return fmt.Errorf(`%s`, out)
 	}
 
-	return err
+	return nil
 }

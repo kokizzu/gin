@@ -18,10 +18,9 @@ import (
 )
 
 var (
-	startTime  = time.Now()
-	logger     = log.New(os.Stdout, "[gin] ", 0)
-	immediate  = false
-	buildError error
+	startTime = time.Now()
+	logger = log.New(os.Stdout, "[gin] ", 0)
+	immediate = false
 )
 
 func main() {
@@ -95,10 +94,11 @@ func MainAction(c *cli.Context) {
 
 	builder := gin.NewBuilder(c.GlobalString("path"), c.GlobalString("bin"), c.GlobalBool("godep"))
 	runpath := builder.Binary()
-	if runpath[0] != '/' { // prevent merging with working directory when absolute path		
- 		runpath = filepath.Join(wd, runpath)		
- 	}		
- 	runner := gin.NewRunner(runpath, c.Args()...)	
+	if runpath[0] != '/' {
+		// prevent merging with working directory when absolute path
+		runpath = filepath.Join(wd, runpath)
+	}
+	runner := gin.NewRunner(runpath, c.Args()...)
 	runner.SetWriter(os.Stdout)
 	proxy := gin.NewProxy(builder, runner)
 
@@ -121,7 +121,7 @@ func MainAction(c *cli.Context) {
 
 	// scan for changes
 	scanChanges(c.GlobalString("path"), func(path string) {
-                fmt.Println(`[modified]`,path)
+		fmt.Println(`[modified]`, path)
 		runner.Kill()
 		build(builder, runner, logger)
 	})
@@ -143,14 +143,12 @@ func EnvAction(c *cli.Context) {
 func build(builder gin.Builder, runner gin.Runner, logger *log.Logger) {
 	start := time.Now()
 	err := builder.Build()
+	elapsed := float64(time.Since(start).Nanoseconds())
+	ms := fmt.Sprintf(`%.2f`, elapsed / 1000000.0) + ` ms`
 	if err != nil {
-		buildError = err
-		logger.Println("ERROR! Build failed.")
-		fmt.Println(builder.Errors())
+		logger.Println(`Build Failed in ` + ms)
 	} else {
-		elapsed := float64(time.Since(start).Nanoseconds())
-		logger.Println(`Build Successful in ` + fmt.Sprintf(`%.2f`, elapsed/1000000.0) + ` ms`)
-		buildError = nil
+		logger.Println(`Build Successful in ` + ms)
 		if immediate {
 			runner.Run()
 		}
